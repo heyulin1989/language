@@ -1,0 +1,4 @@
+zoom in
+  C-x,C-+
+zoom out
+  C-x,C--
