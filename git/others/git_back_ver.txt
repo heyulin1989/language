@@ -1,0 +1,1 @@
+git reset --hard version_hash_id
