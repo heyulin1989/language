@@ -1,0 +1,10 @@
+emacs query replace
+C-q C-j : 代表一个回车
+! : 替换所有剩余
+
+我们可以这样用
+
+M-%  : 进入正则表达式的替换中
+C-q C-j C-q C-j *
+替换为
+C-q C-j
