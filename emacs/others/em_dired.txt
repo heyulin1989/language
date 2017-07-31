@@ -1,0 +1,1 @@
+使用 M-x wdired-change-to-wdired-mode 进入 编辑模式，这个时候可以直接像编辑普通文本一样编辑文件名，还可以添加路径 来实现把文件移动到其他目录。除了文件名可以编辑以外，其他部分被标记为只 读，但是如果把 wdired-allow-to-change-permissions 设为 t 的话，还可以 编辑文件的权限位。编辑完成之后使用 C-c C-c 来应用所做的编辑
