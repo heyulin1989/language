@@ -1,0 +1,6 @@
+python三元表达式
+  x if c else y
+python中的断言使用
+__debug__ : 这个python的默认值为True, 且是只读, python2.7中无法修改该值
+不使用可以用以下的方法
+python -O *.py
