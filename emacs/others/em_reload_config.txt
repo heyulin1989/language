@@ -1,0 +1,2 @@
+choose region then
+M-x eval-buffer
