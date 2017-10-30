@@ -2,7 +2,7 @@
 '''
 使用trackback获取栈信息
 '''
-
+import traceback
 gList=['a', 'b', 'c', 'd', 'e', 'f', 'g']
 
 def f():
@@ -22,3 +22,5 @@ if __name__ == '__main__':
     except IndexError as ex:
         print "Sorry, Exception occured, you accessed an element out of range."
         print ex
+        print traceback.print_exc()
+        

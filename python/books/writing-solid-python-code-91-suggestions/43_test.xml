@@ -1,0 +1,7 @@
+<systems>
+  <system platform="linux" name="linuxtest">
+	<purpose> automation test	</purpose>
+	<system_type> virtual	</system_type>
+	<ip_address/>
+  </system>
+</systems>

@@ -31,4 +31,6 @@ Guido: There have have many. ABC was a major influnce,  of course, since I have 
 
 2.Python语言本身的动态性决定了使用self能够带来一定的便利
 3.在存在同名的变量以及实例变量的情况下使用self使得实例变量更容易被区分
+
+Python的哲学:  Explicit is better than implicit
 '''
