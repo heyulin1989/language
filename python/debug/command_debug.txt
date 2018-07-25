@@ -1,0 +1,7 @@
+python 命令行调试的方法
+官网链接
+https://docs.python.org/3/library/pdb.html
+
+python -m pdb 程序
+
+
