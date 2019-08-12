@@ -451,7 +451,6 @@ int main(int argc, char** argv)
     t.end();
     float used_time = t.get_time_of_microseconds()/1000000;
     printf("平均每秒识别的张数=%f total=%d total_time=%f", (size/used_time), size, used_time);
-
     // exit
     ret = seemmo_uninit();
     std::cout << "unInitialize SDK: " << ret << std::endl;
