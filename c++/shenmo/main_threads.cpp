@@ -13,8 +13,14 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "rapidjson/document.h"
+#include "rapidjson/filereadstream.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
 
 using namespace std;
+using namespace rapidjson;  //引入rapidjson命名空间                                                                                                                                                          
 
 DEFINE_string(base_dir, "./shenmo-picture/", "base dir");
 DEFINE_string(i, "./image.lst", "file name of image list");
@@ -29,6 +35,8 @@ DEFINE_string(param_file, "./shenmo-pictuire/centos7/bin/param.txt", "param.txt 
 
 
 int test_work(std::vector<std::string>& image_list, int device, int batch);
+
+
 
 template <typename T>
 std::string num2str(const T i){
@@ -260,6 +268,52 @@ int load_binary(const std::string& file, std::string& content, const char* fmode
 	return 0;
 }
 
+bool split_ImageResults(const char* json, std::vector<std::string>& vec_name)
+{
+    Document doc;
+    if (doc.Parse(json).HasParseError()){
+        cout << "parse error!" << endl;
+        return false;
+    }
+    int code = doc["Code"].GetInt();
+    std::string message = doc["Message"].GetString();
+
+    Value &image_arr=doc["ImageResults"];
+    int size = (int)image_arr.Size();
+    if (size != vec_name.size()){
+        cout << "image 识别张数不对 size=[" <<  size<< "]vec_name.size=[" << vec_name.size() << "]" << endl;
+        for (int i = 0; i < vec_name.size(); i++){
+            cout << vec_name[i] << endl;
+        }
+        return false;
+    }
+    for (int i = 0; i < size; i++){
+        Value& e = image_arr[i];
+
+        Document doc1;
+        doc1.SetObject();
+        Document::AllocatorType &allocator=doc1.GetAllocator(); //获取分配器                                                                                                                                 
+        Value ImageResults(kArrayType);
+        ImageResults.PushBack(e, allocator);
+	Value Message(kStringType);
+	Message.SetString(message.c_str(), allocator);
+
+        doc1.AddMember("Code", code, allocator);
+        doc1.AddMember("Message", Message, allocator);
+        doc1.AddMember("ImageResults", ImageResults, allocator);
+
+        StringBuffer buffer;
+        PrettyWriter<StringBuffer> pretty_writer(buffer);  //PrettyWriter是格式化的json，如果是Writer则是换行空格压缩后的json
+        doc1.Accept(pretty_writer);
+        std::string  str = buffer.GetString();
+        write_file(vec_name[i], const_cast<char*>(str.c_str()));
+    }
+
+    return true;
+}
+
+
+
 int test_work_batch(const std::vector<std::string>& image_list, int device, int batch)
 {
 
@@ -283,10 +337,12 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 	for (int num = 0; num < size/batch; num++){
 			
 		std::vector<std::vector<unsigned char>* > image_data_list;
+		std::vector<std::string> vec_filename;
 		image_data_list.resize(batch);
 		for (int i = 0; i < batch; ++i) {
 			std::string img_data;
 			std::string filename = image_list[recog_count++];
+
 			if (0 != load_binary(filename, img_data, "rb")) {
 				continue;	
 			}
@@ -295,8 +351,9 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 				std::cout << "new image data failed" << std::endl;
 				continue;
 			}
-
+            
 			std::string name = get_output_name(filename, output_dir);
+			vec_filename.push_back(name);
 			name = num2str<pthread_t>(pthread_self());
 			filename += "\n";
 			//cout << "has deal with name =[" << filename << "]" << endl;
@@ -332,6 +389,7 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 		if (res_buf){
 			std::string name = "output.txt";	
 			write_file(name, res_buf);
+			split_ImageResults(res_buf, vec_filename);
 			delete res_buf;
 		}
 

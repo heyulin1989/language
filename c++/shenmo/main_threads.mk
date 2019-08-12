@@ -4,6 +4,7 @@ demo: ./main_threads.cpp
 	/usr/bin/g++ -g ./main_threads.cpp  \
 	-o ./$(NAME) \
 	-I $(DIR)/include/ \
+	-I $(DIR)/../ \
 	-I $(DIR)/centos7/bin/thirdlib/opencv/opencv-2.4.10/include/ \
 	-I $(DIR)/centos7/bin/thirdlib/gflag/include/ \
 	-L $(DIR)/centos7/bin/thirdlib/opencv/opencv-2.4.10/lib -lopencv_highgui -lopencv_core -lpthread \
