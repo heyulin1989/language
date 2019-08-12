@@ -1,0 +1,72 @@
+{
+    "Detect": {
+        "IsDet": true,
+        "Mode": 0,
+        "Threshold": 20,
+        "DetectRegion":[0,0,0,0],
+        "MinCarWidth":250
+    },
+    "Recognize": {
+        "Belt": {
+            "IsRec": true
+        },
+        "Call": {
+            "IsRec": true
+        },
+        "Crash": {
+            "IsRec": true
+        },
+        "Danger": {
+            "IsRec": true
+        },
+        "Brand": {
+            "IsRec": true
+        },
+        "Color": {
+            "IsRec": true
+        },
+        "Type": {
+            "IsRec": true
+        },
+        "Similar": {
+            "IsRec": false
+        },
+        "Marker": {
+            "IsRec": true,
+            "Threshold":30
+        },
+        "Plate": {
+            "IsRec": true
+        },
+        "Convertible":{
+            "IsRec": true
+        },
+        "Manned":{
+            "IsRec": true
+        },
+        "Slag":{
+            "IsRec": true
+        },
+        "Rack":{
+            "IsRec": true
+        },
+        "Sunroof":{
+            "IsRec" : true
+        },
+        "SpareTire": {
+            "IsRec": true
+        },
+        "Pedestrian":{
+            "IsRec" : true
+        },
+        "Shotcrete":{
+            "IsRec" : true
+        },
+        "Lid":{
+            "IsRec" : true
+        },
+        "Face": {
+            "IsRec": true
+        }
+    }
+}

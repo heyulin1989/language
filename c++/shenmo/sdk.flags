@@ -1,0 +1,13 @@
+-sc_json_version=2
+-sc_plate_minwidth=50
+-sc_plate_threshold=20
+-sc_belt_threshold=93
+-sc_call_threshold=93
+-sc_crash_threshold=60
+-sc_danger_threshold=80
+-sc_obj_det_threshold=20
+-sc_pvc_sim_thresh=0.005
+-sc_pvc_iou_thresh=0.1
+-sc_pvc_missing_thresh=4
+-sc_rec_type_slag
+-sc_rec_new_car_feature
