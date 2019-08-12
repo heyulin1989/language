@@ -24,6 +24,7 @@ using namespace rapidjson;  //引入rapidjson命名空间
 
 DEFINE_string(base_dir, "./shenmo-picture/", "base dir");
 DEFINE_string(i, "./image.lst", "file name of image list");
+DEFINE_string(sper, " ", "image.lst sperator (default space)");
 DEFINE_int32(n, 1, "the num of image to prepared for test");
 DEFINE_string(device, "0", "device id: 0,1,2");
 DEFINE_string(thread_num, "1", "thread number of gpu. 8,9,10");
@@ -34,9 +35,7 @@ DEFINE_string(auth_server, "192.168.1.198:12821", "the port of the server to lis
 DEFINE_string(param_file, "./shenmo-pictuire/centos7/bin/param.txt", "param.txt used by recognize.");
 
 
-int test_work(std::vector<std::string>& image_list, int device, int batch);
-
-
+int test_work_batch(const std::vector<std::string>& image_list, const std::vector<std::string>& output_list, int device, int batch);
 
 template <typename T>
 std::string num2str(const T i){
@@ -98,7 +97,7 @@ std::string get_upload_time(time_t t = 0){
 
 static std::string json_param = "";
 std::vector<std::string> vfilename;
-std::vector<std::string> output_dir;
+std::vector<std::string> output_file;
 std::vector<int> vec_device;
 std::vector<int> vec_thread_num;
 
@@ -106,6 +105,7 @@ struct thread_info{
     int device;
     int batch_num;
     std::vector<std::string>* img_vec;
+    std::vector<std::string>* img_output_vec;
 };
 
 void printids(const char *s){
@@ -126,7 +126,7 @@ void* thr_fn(void* arg){
 	printf("pic number=[%d]device=[%d]batch_name=[%d]\n", tinfo->img_vec->size(), tinfo->device, tinfo->batch_num);
     std::cout << "pic number = " << tinfo->img_vec->size()<< "device=["<< tinfo->device<< "]batch_name=["<< tinfo->batch_num <<"]" <<std::endl;
 
-	test_work(*(tinfo->img_vec), tinfo->device, tinfo->batch_num);
+	test_work_batch(*(tinfo->img_vec), *(tinfo->img_output_vec), tinfo->device, tinfo->batch_num);
 
     return ((void*)0);
 }
@@ -141,7 +141,7 @@ void create_one_thread(pthread_t* t_id,thread_info* tinfo)
 
 }
 
-void create_all_thread(std::vector<std::string>& image_vec){
+void create_all_thread(std::vector<std::string>& image_vec,std::vector<std::string>& image_output_vec){
 
     int i = 0;
     int num = 0;
@@ -150,8 +150,10 @@ void create_all_thread(std::vector<std::string>& image_vec){
 	}
 	cout << "image size=" << image_vec.size() << endl;
     std::vector<std::string>* p_img_vec = new std::vector<std::string>[num];
+    std::vector<std::string>* p_img_output_vec = new std::vector<std::string>[num];
     for(i = 0; i < image_vec.size(); i++){
         p_img_vec[i%num].push_back(image_vec[i]);
+        p_img_output_vec[i%num].push_back(image_output_vec[i]);
     }
 
     pthread_t* pth_arr = new pthread_t[num]();
@@ -165,6 +167,7 @@ void create_all_thread(std::vector<std::string>& image_vec){
 			p_tinfo_arr[thread_count].device = vec_device[i];
 			p_tinfo_arr[thread_count].batch_num = FLAGS_n;
 			p_tinfo_arr[thread_count].img_vec = p_img_vec+thread_count;
+			p_tinfo_arr[thread_count].img_output_vec = p_img_output_vec+thread_count;
 			thread_count++;
 		}
     }
@@ -185,7 +188,7 @@ void create_all_thread(std::vector<std::string>& image_vec){
 }
 
 
-void filescan_lst(const char *path, std::vector<std::string>& vec_file)
+void filescan_lst(const char *path, std::string sper, std::vector<std::string>& vec_file, std::vector<std::string>& vec_output)
 {
     if (!path){
         perror("path is null");
@@ -193,39 +196,12 @@ void filescan_lst(const char *path, std::vector<std::string>& vec_file)
     std::fstream f(path);//创建一个fstream文件流对象
     std::string line;
     while (getline(f, line)){
-        if (!line.compare(line.size()-4, 4, ".jpg")){ // 找到jpg
-            vec_file.push_back(line);
-        }
+        std::vector<std::string> vec = split(line, sper);
+        vec_file.push_back(vec[0]);
+        vec_output.push_back(vec[1]);
     }
 }
 
-
-void filescan_output_dir(const char *path, std::vector<std::string>& vec_file)
-{
-    if (!path){
-        perror("path is null");
-    }
-    std::fstream f(path);//创建一个fstream文件流对象
-    std::string line;
-    while (getline(f, line)){
-        vec_file.push_back(line);
-    }
-}
-
-std::string get_output_name(std::string& filename, std::vector<std::string>& vec_file)
-{
-    std::string ret = filename+".json";
-    for (int i = 0; i < vec_file.size(); i++){
-        int pos = vec_file[i].rfind("/");
-        std::string t = vec_file[i];
-        if (filename.substr(0, pos) == t.substr(0, pos)){
-            int p = filename.rfind("/");
-			std::string name = filename.substr(p+1);
-            return vec_file[i]+"/"+name.substr(0, name.length()-3)+"json";
-        }
-    }
-    return ret;
-}
 
 void write_file(std::string& filename, char* buffer){
 	FILE * fp = fopen(filename.c_str(), "wb");
@@ -295,8 +271,8 @@ bool split_ImageResults(const char* json, std::vector<std::string>& vec_name)
         Document::AllocatorType &allocator=doc1.GetAllocator(); //获取分配器                                                                                                                                 
         Value ImageResults(kArrayType);
         ImageResults.PushBack(e, allocator);
-	Value Message(kStringType);
-	Message.SetString(message.c_str(), allocator);
+        Value Message(kStringType);
+        Message.SetString(message.c_str(), allocator);
 
         doc1.AddMember("Code", code, allocator);
         doc1.AddMember("Message", Message, allocator);
@@ -314,9 +290,8 @@ bool split_ImageResults(const char* json, std::vector<std::string>& vec_name)
 
 
 
-int test_work_batch(const std::vector<std::string>& image_list, int device, int batch)
+int test_work_batch(const std::vector<std::string>& image_list, const std::vector<std::string>& output_list, int device, int batch)
 {
-
 	int size = image_list.size();
 	if (size < batch) {
 		std::cout << "not enough photos for batch size " << FLAGS_n << " in this dir" << std::endl;
@@ -341,8 +316,9 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 		image_data_list.resize(batch);
 		for (int i = 0; i < batch; ++i) {
 			std::string img_data;
-			std::string filename = image_list[recog_count++];
-
+			std::string filename = image_list[recog_count];
+            std::string output_name = output_list[recog_count];
+            recog_count ++;
 			if (0 != load_binary(filename, img_data, "rb")) {
 				continue;	
 			}
@@ -352,11 +328,9 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 				continue;
 			}
             
-			std::string name = get_output_name(filename, output_dir);
-			vec_filename.push_back(name);
-			name = num2str<pthread_t>(pthread_self());
+			vec_filename.push_back(output_name);
+            std::string name = num2str<pthread_t>(pthread_self());
 			filename += "\n";
-			//cout << "has deal with name =[" << filename << "]" << endl;
 			append_file(name,const_cast<char*>(filename.c_str()));
 
 		}
@@ -383,7 +357,7 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 		total += one_time;
 
 		//if (0 == FLAGS_f)
-			//save_result("batch_res",res_buf);
+        //save_result("batch_res",res_buf);
 		std::cout << "batch = "<< batch << " time=: " << one_time/1000.0<< "ms" << std::endl;
 
 		if (res_buf){
@@ -402,60 +376,11 @@ int test_work_batch(const std::vector<std::string>& image_list, int device, int 
 	std::cout << "count=: " << size/(total/1000000.0)<< "s" << std::endl;
 }
 
-int test_work(std::vector<std::string>& image_list, int device, int batch)
-{
-	if (batch > 1){
-		test_work_batch(image_list, device, batch);
-		return 0;	
-	}
-
-	seemmo_thread_init(SEEMMO_LOAD_TYPE_ALL, device, batch);
-
-	long total = 0;
-	uint64_t size = image_list.size();
-
-	printf("pic number=[%d]device=[%d]batch_name=[%d]\n", size, device, batch);
-	for (uint64_t i = 0; i < size; ++i){
-		std::string filename = image_list[i];
-		std::cout << filename << std::endl;
-		cv::Mat mat = cv::imread(filename, 1);
-		if(mat.empty()){
-			std::cout << "::imread error " << filename << std::endl;
-			continue;
-		}			    
-		clock_t start = clock();
-		int buff_len = 1024 * 1024 * 8;
-		char *rsp_buf = new char[buff_len];
-		memset(rsp_buf, 0x00, buff_len);
-		int ret = 0;
-		if (0 == FLAGS_f) {
-			const char * calc_param = json_param.c_str();
-			ret = seemmo_recog_images((const uint8_t **)&mat.data, 1, (const uint32_t *)&mat.rows, (const uint32_t *)&mat.cols, &calc_param, rsp_buf, buff_len, 2);
-		}
-		rsp_buf[buff_len] = 0;
-		total += (clock() - start)*1000000.0/CLOCKS_PER_SEC;
-
-		// save    
-		std::string name = get_output_name(filename, output_dir);
-		cout << "write_file =[" << name << "]" << endl;
-		write_file(name,rsp_buf); 
-		name = num2str<pthread_t>(pthread_self());
-		filename += "\n";
-		cout << "has deal with name =[" << filename << "]" << endl;
-		append_file(name,const_cast<char*>(filename.c_str()));
-
-		delete[] rsp_buf;
-	}
-	std::cout << "avg count=" << size/(total/1000000.0) << "s" << std::endl;
-	seemmo_thread_uninit();
-	return 0;
-}
-
 int main(int argc, char** argv)
 {
     google::ParseCommandLineFlags(&argc, &argv, true);	
     // init
-		clock_t start = clock();
+    clock_t start = clock();
     std::cout << "Test..." << std::endl;
 	std::string str = FLAGS_device;
 	std::string sper = ",";
@@ -492,11 +417,10 @@ int main(int argc, char** argv)
 	}
 	
 	std::cout << "json_param=[" << json_param << "]" <<  std::endl;
-    filescan_lst(FLAGS_i.c_str(), vfilename);    
-    filescan_output_dir("./output.txt", output_dir);
+    filescan_lst(FLAGS_i.c_str(), FLAGS_sper,vfilename, output_file);    
 
     // exec
-    create_all_thread(vfilename);
+    create_all_thread(vfilename, output_file);
     // exit
     ret = seemmo_uninit();
     std::cout << "unInitialize SDK: " << ret << std::endl;
