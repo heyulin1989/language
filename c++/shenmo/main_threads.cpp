@@ -1,7 +1,7 @@
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include<time.h>
-//////////////////////////////////////////////////////////////
 #include <iostream>
 #include <fstream>
 #include "opencv2/core/core.hpp"
@@ -43,6 +43,29 @@ std::string num2str(const T i){
     stream << i;
     return stream.str();
 }
+
+class time_record{
+
+public:
+    time_record(){
+        gettimeofday(&tpstart,NULL);
+    }
+    void start(){
+        gettimeofday(&tpstart,NULL);
+    }
+    void end(){
+        gettimeofday(&tpend,NULL);
+    }
+    double get_time_of_microseconds(){
+        timeuse = (1000000*(tpend.tv_sec-tpstart.tv_sec)+tpend.tv_usec-tpstart.tv_usec);
+        return timeuse;
+    }
+    ~time_record(){
+    }
+private:
+    struct timeval tpstart,tpend;
+    double timeuse;
+};
 
 std::vector<std::string> split(const std::string &s, const std::string &seperator){
     std::vector<std::string> result;
@@ -298,7 +321,7 @@ int test_work_batch(const std::vector<std::string>& image_list, const std::vecto
 		return -1;
 	}
 
-	seemmo_thread_init(3, device, batch);
+	seemmo_thread_init(2, device, 0);
 	// test imdecode
 	unsigned char **ppbuf = new unsigned char* [batch];
 	std::vector<cv::Mat> mats(batch);
@@ -402,7 +425,8 @@ int main(int argc, char** argv)
 	for (int i = 0; i < vec_thread_num.size(); i++){
 		image_core += vec_thread_num[i];
 	}
-	int ret = seemmo_process_init(FLAGS_base_dir.c_str(), image_core, image_core, FLAGS_auth_server.c_str(), FLAGS_auth_type, true);
+	std::cout << "image_core=" << image_core << std::endl;
+	int ret = seemmo_process_init(FLAGS_base_dir.c_str(), image_core, 0, FLAGS_auth_server.c_str(), FLAGS_auth_type, true);
 	std::cout << "Initialize SDK: " << ret << std::endl;
     
 	// json param
@@ -419,8 +443,15 @@ int main(int argc, char** argv)
 	std::cout << "json_param=[" << json_param << "]" <<  std::endl;
     filescan_lst(FLAGS_i.c_str(), FLAGS_sper,vfilename, output_file);    
 
+    time_record t;
+    int size = vfilename.size();
     // exec
     create_all_thread(vfilename, output_file);
+
+    t.end();
+    float used_time = t.get_time_of_microseconds()/1000000;
+    printf("平均每秒识别的张数=%f total=%d total_time=%f", (size/used_time), size, used_time);
+
     // exit
     ret = seemmo_uninit();
     std::cout << "unInitialize SDK: " << ret << std::endl;
