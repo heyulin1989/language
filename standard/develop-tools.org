@@ -1,0 +1,91 @@
+* base lfs 8.3
+** introduce
+   lfs : linux from scratch 
+** download
+   https://mirror-hk.koddos.net/lfs/lfs-packages/lfs-packages-8.3.tar
+
+* doxygen 1.8.16 
+** depend
+   gnu flex  
+   gnu bison
+   gnu libiconv
+   gnu make 
+   gnu strip
+   python 2.6 or higher 
+   cmake 3.1.3 or later
+   qt 4.3 or higher
+** install 
+** usage
+* gnu flex (in lfs)
+** depend
+   libtool 2.4.6
+   automake 
+   autopoint
+** install 
+
+*** Makefile:1833: recipe for target 'stage1scan.c' failed
+    
+* flex
+** download 
+   git clone https://github.com/westes/flex.git
+**  
+
+* gnu bison (in lfs)
+** depend
+* python 2.7
+** download
+   https://www.python.org/ftp/python/2.7.17/Python-2.7.17.tar.xz
+** depend
+   
+   
+* gnu libiconv
+** download
+    wget https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz
+** depend on 
+* graphviz
+** download
+   https://graphviz.gitlab.io/pub/graphviz/stable/SOURCES/graphviz.tar.gz
+** depend
+* gnu gettext (in lfs)
+** depend
+   autoconf
+** install
+   only use gettext-tools
+   cd gettext-tools
+   ./configure --prefix=/home/hyl/git/software  
+   make 
+   make install
+   
+* libtool 2.4.6
+** download
+   http://mirrors.nju.edu.cn/gnu/libtool/libtool-2.4.6.tar.xz
+** depend
+   gnu m4 1.4.16 or higher command, not library
+** install 
+   ./configure --prefix=/home/hyl/git/software  
+   make 
+   make install
+* automake 1.16.1 (in lfs)
+** depend
+   autoconf
+** install
+   ./configure --prefix=/home/hyl/git/software  
+   make 
+   make install
+   
+* autoconf-2.69 (in lfs)
+** depend 
+** install 
+   ./configure --prefix=/home/hyl/git/software  
+   make 
+   make install
+   
+* gnu m4 (in lfs)
+** depend
+** install
+   ./configure --prefix=/home/hyl/git/software  
+   make 
+   make install
+   
+   
+   
