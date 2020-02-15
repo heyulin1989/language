@@ -1,0 +1,64 @@
+\documentclass{article}
+\begin{document}
+
+\begin{tabular}{|r|l|}
+  \hline
+  7c0 & hexadecimal \\
+  3700 & octal \\ \cline{2-2}
+  11111000000 & binary \\
+  \hline \hline
+  1984 & decimal \\
+  \hline
+\end{tabular}
+
+\begin{tabular}{|p{4.7cm}|}
+  \hline
+  Welcome to Boxy’s paragraph.
+  We sincerely hope you’ll
+  all enjoy the show.\\
+  \hline
+\end{tabular}
+
+\begin{tabular}{@{} l @{}}
+  \hline
+  no leading space\\
+  \hline
+\end{tabular}
+
+\begin{tabular}{l}
+  \hline
+  leading space left and right\\
+  \hline
+\end{tabular}
+\begin{center}
+\begin{tabular}{c r @{.} l}
+  Pi expression &
+  \multicolumn{2}{c}{Value} \\
+  \hline
+  $\pi$ & 3&1416 \\
+  $\pi^{\pi}$ & 36&46 \\
+  $(\pi^{\pi})^{\pi}$ & 80662&7 \\
+\end{tabular}
+\end{center}
+
+\begin{tabular}{|c|c|}
+  \hline
+  \multicolumn{2}{|c|}{Ene} \\
+  \hline
+  Mene & Muh! \\
+  \hline
+\end{tabular}
+
+Figure \ref{white} is na example of Pop-Art
+\begin{figure}[!hbp]
+  \makebox[\textwidth]{\framebox[5cm]{\rule{0pt}{5cm}}}
+  \caption{Five by Five in Centimetres. \label{white}}
+\end{figure}
+
+Figure \ref{white} is na example of Pop-Art
+\begin{figure}[!hbp]
+  \makebox[\textwidth]{\framebox[5cm]{\rule{0pt}{5cm}}}
+  \caption{Five by Five in Centimetres. \label{white}}
+\end{figure}
+
+\end{document}
