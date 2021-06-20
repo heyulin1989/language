@@ -1,6 +1,6 @@
 	;; hello.asm
 	section .data
-	msg db "hello, world",0
+	msg db "hello, worldg",0
 	section .bss
 	section .text
 	global main
@@ -12,5 +12,5 @@ main:
 	syscall 					; display the string
 	mov rax, 60 				; 60 =
 	exit
-	mov rdi, 0 					; 0 = success exit code
+	mov rdi, 2 					; 0 = success exit code
 	syscall 					; quit
