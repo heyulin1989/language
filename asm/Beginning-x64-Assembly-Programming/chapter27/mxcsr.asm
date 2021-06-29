@@ -46,9 +46,74 @@ main:
         mov rdx,two
         mov rcx,[default_mxcsr]
         call apply_mxcsr
-        mov rax,0
-        
-        leave
+        ;; -------------------------------------------------------
+        ;; division with precision error
+        ;; default mxcsr
+        mov rdi,fmt1
+        mov rsi,ten    
+        mov rdx,three
+        mov ecx,[default_mxcsr]
+        call apply_mxcsr
+        ;; divide by zero
+        ;; default mxcsr
+        mov rdi,fmt2
+        mov rsi,ten 
+        mov rdx,zero 
+        mov ecx,[default_mxcsr]
+        call apply_mxcsr
+
+		;; division with precision error
+		;; round up
+		mov rdi,fmt4
+		mov rsi,ten
+		mov rdx,three
+		mov ecx, [round_up]
+		call apply_mxcsr
+		;; division with precision error
+		;; round down
+		mov rdi,fmt5
+		mov rsi,ten
+		mov rdx,three
+		mov ecx, [round_down]
+		call apply_mxcsr
+
+		;; division with precision error
+		;; truncate
+		mov rdi,fmt6
+		mov rsi,ten
+		mov rdx,three
+		mov ecx, [truncate]
+		call apply_mxcsr
+		;; ----------------------------------------------
+		;; division with precision error
+		;; default mxcsr
+		mov rdi,fmt1
+		mov rsi,eleven
+		mov rdx,three
+		mov ecx, [default_mxcsr]
+		call apply_mxcsr			;division with precision error
+		;; round up
+		mov rdi,fmt4
+		mov rsi,eleven
+		mov rdx,three
+		mov ecx, [round_up]
+		call apply_mxcsr
+		;; division with precision error
+		;; round up
+		mov rdi,fmt5
+		mov rsi,eleven
+		mov rdx,three
+		mov ecx, [round_down]
+		call apply_mxcsr
+		;; division with precision error
+		;; truncate
+		mov rdi,fmt6
+		mov rsi,eleven
+		mov rdx,three
+		mov ecx, [truncate]
+		call apply_mxcsr
+
+    	leave
         ret
         ;; function -----------------------------------------------
 apply_mxcsr:
@@ -70,7 +135,7 @@ apply_mxcsr:
         ldmxcsr [mxcsr_before]
         movsd xmm2,[rsi]        ;double precision float into xmm2
         divsd xmm2,[rdx]        ;divide xmm2
-	stmxcsr [mxcsr_after]   ;save mxcsr to memory
+        stmxcsr [mxcsr_after]   ;save mxcsr to memory
         movsd [xmm],xmm2        ;for use in print_xmm
         mov rdi,f_div
         movsd xmm0,[rsi]
@@ -99,7 +164,7 @@ print_xmm:
         push rbp
         mov rbp,rsp
 
-	mov rdi,hex             ;print 0x
+        mov rdi,hex             ;print 0x
         call printf
         mov rcx,8
         
