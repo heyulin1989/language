@@ -31,6 +31,19 @@ int add(int a, int b)
             );
 }
 
+int cpuid(long *e, long* d)
+{
+    __asm__(
+            ".intel_syntax noprefix;"
+            "xor r12, r12;"
+            "mov rax, 1;"
+            "cpuid;"
+            "mov [rdi],rcx;"
+            "mov [rsi],rdx;"
+            );
+    printf("ecx=%lx,edx=%lx\n",*e,*d);
+    return 0;
+}
 int main()
 {
     printf("The numbers are %d and %d\n", x, y);
@@ -44,6 +57,7 @@ int main()
     printf("The difference is %d.\n",subtract());
     printf("The add is %d.\n",add(100,200));
     printf("The add float is %f.\n",add_float(100.12,200.12));
-    
+    long e,d;
+    cpuid(&e,&d);
     return 0;
 }
