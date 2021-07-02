@@ -44,6 +44,13 @@ int cpuid(long *e, long* d)
     printf("ecx=%lx,edx=%lx\n",*e,*d);
     return 0;
 }
+int count_bits(long long i){
+    __asm__(
+            ".intel_syntax noprefix;"
+            " popcnt rdi,rdi;"
+			" mov rax, rdi;"
+			);
+}
 int main()
 {
     printf("The numbers are %d and %d\n", x, y);
@@ -59,5 +66,8 @@ int main()
     printf("The add float is %f.\n",add_float(100.12,200.12));
     long e,d;
     cpuid(&e,&d);
+	long long i = 0xffffffffff;
+	printf("bits = %d\n", count_bits(i));
+	
     return 0;
 }
